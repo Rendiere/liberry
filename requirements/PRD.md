@@ -18,10 +18,20 @@
 - Progress bar for track position
 
 ### 1.3 Sidebar
-- Library sections (All Tracks, Artists, Albums, Genres)
-- Playlists section
-- Smart playlists section
-- AI features section
+- Two level sidebar, with highlighting for current page and folding sections. Each top level section should have a button to jump to the most recent activity for that section and have an icon.
+- Listen:
+  - All Tracks
+  - Playlists section with sub-sections for each playlist
+- Manage:
+  - Library Cleaner
+  - Tagging System
+- Create:
+  - Genius Playlist
+  - DJ Sets
+  - Mixtapes
+
+
+
 
 ### 1.4 Library Management UI
 - Statistics toast notification showing library health
