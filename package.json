@@ -1,26 +1,30 @@
 {
-  "name": "electron-vue-template",
+  "name": "music-collector-app",
   "version": "0.1.0",
-  "description": "A minimal Electron + Vue application",
-  "main": "main/main.js",
+  "main": "dist-electron/main.js",
+  "description": "Music Collector App",
+  "author": "Your Name",
   "scripts": {
-    "dev": "node scripts/dev-server.js",
-    "build": "node scripts/build.js && electron-builder",
-    "build:win": "node scripts/build.js && electron-builder --win",
-    "build:mac": "node scripts/build.js && electron-builder --mac",
-    "build:linux": "node scripts/build.js && electron-builder --linux"
-  },
-  "devDependencies": {
-    "@vitejs/plugin-vue": "^4.4.1",
-    "chalk": "^4.1.2",
-    "chokidar": "^3.5.3",
-    "electron": "^32.1.2",
-    "electron-builder": "^25.1.6",
-    "typescript": "^5.2.2",
-    "vite": "^4.5.0"
+    "dev": "vite",
+    "build": "vue-tsc && vite build && electron-builder",
+    "preview": "vite preview"
   },
   "dependencies": {
-    "music-metadata": "^10.5.0",
-    "vue": "^3.3.8"
+    "music-metadata": "^7.13.0",
+    "vue": "^3.4.21"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.4",
+    "@vue/runtime-core": "^3.5.10",
+    "autoprefixer": "^10.4.20",
+    "electron": "^30.0.1",
+    "electron-builder": "^24.13.3",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.13",
+    "typescript": "^5.2.2",
+    "vite": "^5.1.6",
+    "vite-plugin-electron": "^0.28.6",
+    "vite-plugin-electron-renderer": "^0.14.5",
+    "vue-tsc": "^2.0.26"
   }
 }

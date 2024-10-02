@@ -1,77 +1,77 @@
-# Music Library Manager MVP and Development Roadmap
+# Music Collector App Development Roadmap
 
-## Minimum Viable Product (MVP) Definition
+## Phase 1: Project Setup and Local File Integration (Completed)
+1. Initialize Electron project with Vue.js and Vite
+2. Set up Tailwind CSS for styling
+3. Create basic file structure and main window
+4. Implement local file scanning functionality
+5. Create basic metadata extraction for local files
 
-1. Basic Music Library Management
-   - Import music files from a local folder
-   - Display tracks in a table view with basic metadata
-   - Basic playback functionality (play, pause, skip)
+## Phase 2: Local File Playback and Library Management (Partially Completed)
+1. Implement local file playback functionality
+2. Create a basic "Now Playing" interface
+3. Develop library view for browsing local files
+4. Implement sorting and filtering for local library
+5. Add search functionality for local files
 
-2. Simple Playlist Management
-   - Create and edit playlists
-   - Add/remove tracks to/from playlists
+## Phase 3: Local Database Integration
+1. Set up SQLite database for local storage
+2. Implement data models for music tracks and metadata
+3. Create functions to store scanned music data in the database
+4. Develop functionality to load music library from the database
+5. Implement database update mechanisms for metadata changes
 
-3. Basic Library Cleaning
-   - Identify missing metadata
-   - Simple automatic metadata filling (e.g., extracting artist from track title)
+## Phase 4: Custom Table View and Inline Editing
+1. Design and implement a custom table component for the music library
+2. Add functionality for sorting and filtering within the table
+3. Implement inline editing for metadata fields
+4. Create a right-click context menu for editing options
+5. Develop real-time database updates for edited metadata
 
-4. Minimal UI
-   - Main library view
-   - Sidebar with basic navigation
-   - Simple playback controls
+## Phase 5: UI/UX Improvements
+1. Redesign the main interface to match the provided example image
+2. Implement a persistent "Now Playing" bar at the bottom of the screen
+3. Create a sidebar for navigation and additional features
+4. Improve overall styling and responsiveness
+5. Implement dark mode and theme customization
 
-5. Data Persistence
-   - Local storage of library information
+## Phase 6: Spotify Integration
+1. Set up Spotify API authentication
+2. Implement basic Spotify library import
+3. Create unified library view (local + Spotify)
+4. Add Spotify playback functionality
+5. Implement Spotify metadata syncing
 
-## Development SpecMap
+## Phase 7: Discogs Integration
+1. Set up Discogs API authentication
+2. Implement basic Discogs collection import
+3. Extend unified library view to include Discogs items
+4. Implement Discogs metadata syncing
 
-# Music Library Manager MVP SpecMap
+## Phase 8: Advanced Metadata Management
+1. Implement batch metadata update feature
+2. Create system for resolving metadata conflicts between platforms
+3. Implement metadata filling from Spotify or Discogs for local files
 
-## 1. Project Setup [Week 1]
-- [ ] Set up Electron project
-- [ ] Configure TypeScript and React
-- [ ] Set up basic folder structure
+## Phase 9: Playlist Management
+1. Implement playlist creation and management
+2. Add support for cross-platform playlists
+3. Create smart playlist functionality
+4. Develop playlist export feature for connected platforms
 
-## 2. Core Functionality [Weeks 2-3]
-- [ ] Implement file system access for reading music files
-- [ ] Create data models for tracks and playlists
-- [ ] Develop metadata extraction functionality
-- [ ] Implement basic playback controls
+## Phase 10: Performance Optimization
+1. Implement lazy loading for large music libraries
+2. Optimize database queries and indexing
+3. Improve overall app responsiveness and load times
 
-## 3. User Interface [Weeks 4-5]
-- [ ] Design and implement main layout
-  - [ ] Create sidebar component
-  - [ ] Develop table view for tracks
-  - [ ] Add playback control panel
-- [ ] Implement basic styling
+## Phase 11: Testing and Bug Fixes
+1. Implement unit and integration tests
+2. Conduct thorough user testing
+3. Address and fix identified bugs and issues
 
-## 4. Library Management [Weeks 6-7]
-- [ ] Develop library import functionality
-- [ ] Implement track metadata display and editing
-- [ ] Create basic search and filter capabilities
+## Phase 12: Packaging and Distribution
+1. Set up build process for multiple platforms
+2. Create installer and auto-update functionality
+3. Prepare for initial beta release
 
-## 5. Playlist Features [Week 8]
-- [ ] Implement playlist creation and editing
-- [ ] Develop UI for adding/removing tracks to/from playlists
-
-## 6. Basic Library Cleaning [Week 9]
-- [ ] Implement missing metadata detection
-- [ ] Develop simple automatic metadata filling
-
-## 7. Data Persistence [Week 10]
-- [ ] Implement local storage for library and playlist data
-- [ ] Develop data loading on app startup
-
-## 8. Testing and Refinement [Weeks 11-12]
-- [ ] Conduct thorough testing of all MVP features
-- [ ] Fix bugs and refine user experience
-- [ ] Optimize performance for large libraries
-
-## 9. Documentation and Preparation for Release [Week 13]
-- [ ] Write user documentation
-- [ ] Prepare for initial release (versioning, packaging)
-
-## 10. MVP Release [End of Week 13]
-- [ ] Release MVP version for macOS
-
-Note: This roadmap provides a structured approach to developing the MVP, but it's flexible. As development progresses, timelines or priorities may need to be adjusted based on challenges encountered or new insights gained.
+Each phase is designed to be completed in about 2-3 days, focusing on key functionalities and integrations. This roadmap allows for iterative development and testing of core features, with each phase building upon the previous ones.

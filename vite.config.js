@@ -1,23 +1,47 @@
-const Path = require('path');
-const vuePlugin = require('@vitejs/plugin-vue')
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import electron from 'vite-plugin-electron'
+import renderer from 'vite-plugin-electron-renderer'
 
-const { defineConfig } = require('vite');
-
-/**
- * https://vitejs.dev/config
- */
-const config = defineConfig({
-    root: Path.join(__dirname, 'src', 'renderer'),
-    publicDir: 'public',
-    server: {
-        port: 8080,
+export default defineConfig({
+  base: './',
+  plugins: [
+    vue(),
+    electron([
+      {
+        entry: 'electron/main.ts',
+        vite: {
+          build: {
+            outDir: 'dist-electron',
+            rollupOptions: {
+              external: ['electron', 'music-metadata']
+            }
+          }
+        }
+      },
+      {
+        entry: 'electron/preload.ts',
+        onstart(options) {
+          options.reload()
+        },
+        vite: {
+          build: {
+            outDir: 'dist-electron',
+            rollupOptions: {
+              external: ['electron']
+            }
+          }
+        }
+      }
+    ]),
+    renderer()
+  ],
+  css: {
+    postcss: {
+      plugins: [
+        require('tailwindcss'),
+        require('autoprefixer'),
+      ],
     },
-    open: false,
-    build: {
-        outDir: Path.join(__dirname, 'build', 'renderer'),
-        emptyOutDir: true,
-    },
-    plugins: [vuePlugin()],
-});
-
-module.exports = config;
+  },
+})
