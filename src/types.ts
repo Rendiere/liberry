@@ -8,3 +8,13 @@ export interface MusicFile {
     genre?: string[];
   };
 }
+
+export interface ElectronAPI {
+  invoke: (channel: string, ...args: any[]) => Promise<any>;
+}
+
+declare global {
+  interface Window {
+    electron: ElectronAPI;
+  }
+}

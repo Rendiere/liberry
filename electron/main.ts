@@ -1,9 +1,52 @@
 import { app, BrowserWindow, ipcMain, dialog, protocol } from 'electron'
 import path from 'path'
-import fs from 'fs/promises'  // Import the promises version of fs
+import fs from 'fs/promises'
 import * as mm from 'music-metadata'
 import { fileURLToPath } from 'url'
-import { MusicFile } from '../src/types'  // Make sure this path is correct
+import { MusicFile } from '../src/types'
+
+let db: any;
+let dbPath: string;
+
+async function initializeDatabase() {
+  try {
+    const initSqlJs = require('sql.js');
+    const SQL = await initSqlJs();
+    dbPath = path.join(app.getPath('userData'), 'musicLibrary.sqlite');
+    console.log('Database path:', dbPath);
+    
+    try {
+      const fileBuffer = await fs.readFile(dbPath);
+      db = new SQL.Database(fileBuffer);
+      console.log('Existing database loaded');
+    } catch (err) {
+      console.log('Creating new database');
+      db = new SQL.Database();
+      db.run(`
+        CREATE TABLE IF NOT EXISTS music_files (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          path TEXT UNIQUE,
+          title TEXT,
+          artist TEXT,
+          album TEXT,
+          year INTEGER,
+          genre TEXT
+        )
+      `);
+    }
+
+    await saveDatabaseToDisk();
+  } catch (error) {
+    console.error('Failed to initialize database:', error);
+    throw error;
+  }
+}
+
+async function saveDatabaseToDisk() {
+  const data = db.export();
+  await fs.writeFile(dbPath, Buffer.from(data));
+  console.log('Database saved to disk');
+}
 
 interface MusicFile {
   path: string;
@@ -41,8 +84,11 @@ function createWindow() {
     return result.filePaths
   })
 
-  // Handle the scanDirectory event
-  ipcMain.handle('scanDirectory', scanDirectory)
+  // Update the handler name to 'scan:directory'
+  ipcMain.handle('scan:directory', async (_, dirPath: string) => {
+    const musicFiles = await scanDirectoryForMusicFiles(dirPath);
+    return musicFiles;
+  })
 
   // Update the playAudio handler
   ipcMain.handle('playAudio', (event, filePath) => {
@@ -63,9 +109,13 @@ function createWindow() {
       return false
     }
   })
+
+  // Add these new handlers
+  ipcMain.handle('loadMusicFiles', loadMusicFiles);
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  await initializeDatabase();
   protocol.registerFileProtocol('safe-file', (request, callback) => {
     const filePath = fileURLToPath('file://' + request.url.slice('safe-file://'.length))
     callback(filePath)
@@ -123,31 +173,21 @@ async function extractMetadata(filePath: string): Promise<MusicFile['metadata']>
   }
 }
 
-ipcMain.handle('scan:directory', async (_, dirPath: string) => {
-  try {
-    const musicFiles = await scanDirectoryForMusicFiles(dirPath)
-    return musicFiles
-  } catch (error) {
-    console.error('Error scanning directory:', error)
-    throw error  // Re-throw the error so it's passed back to the renderer process
-  }
-})
-
 // Update the scanDirectoryForMusicFiles function
 async function scanDirectoryForMusicFiles(dirPath: string): Promise<MusicFile[]> {
-  const files = await fs.readdir(dirPath)
-  const musicFiles: MusicFile[] = []
+  const files = await fs.readdir(dirPath);
+  const musicFiles: MusicFile[] = [];
 
   for (const file of files) {
-    const filePath = path.join(dirPath, file)
-    const stats = await fs.stat(filePath)
+    const filePath = path.join(dirPath, file);
+    const stats = await fs.stat(filePath);
 
     if (stats.isDirectory()) {
-      musicFiles.push(...await scanDirectoryForMusicFiles(filePath))
-    } else if (path.extname(file).toLowerCase() === '.mp3') {
+      musicFiles.push(...await scanDirectoryForMusicFiles(filePath));
+    } else if (['.mp3', '.flac', '.wav', '.ogg', '.m4a'].includes(path.extname(file).toLowerCase())) {
       try {
-        const metadata = await mm.parseFile(filePath)
-        musicFiles.push({
+        const metadata = await mm.parseFile(filePath);
+        const musicFile = {
           path: filePath,
           metadata: {
             title: metadata.common.title || path.basename(filePath),
@@ -156,12 +196,45 @@ async function scanDirectoryForMusicFiles(dirPath: string): Promise<MusicFile[]>
             year: metadata.common.year,
             genre: metadata.common.genre,
           }
-        })
+        };
+        musicFiles.push(musicFile);
+        
+        // Insert or update the file in the database
+        const stmt = db.prepare(`
+          INSERT OR REPLACE INTO music_files (path, title, artist, album, year, genre)
+          VALUES (?, ?, ?, ?, ?, ?)
+        `);
+        stmt.run([
+          musicFile.path,
+          musicFile.metadata.title,
+          musicFile.metadata.artist,
+          musicFile.metadata.album,
+          musicFile.metadata.year,
+          musicFile.metadata.genre ? musicFile.metadata.genre.join(', ') : null
+        ]);
+        stmt.free();
       } catch (error) {
-        console.error(`Error parsing metadata for ${filePath}:`, error)
+        console.error(`Error parsing metadata for ${filePath}:`, error);
       }
     }
   }
 
-  return musicFiles
+  await saveDatabaseToDisk();
+  return musicFiles;
+}
+
+async function loadMusicFiles(): Promise<MusicFile[]> {
+  const result = db.exec('SELECT * FROM music_files');
+  if (result.length === 0) return [];
+
+  return result[0].values.map((row: any) => ({
+    path: row[1],
+    metadata: {
+      title: row[2],
+      artist: row[3],
+      album: row[4],
+      year: row[5],
+      genre: row[6] ? row[6].split(', ') : []
+    }
+  }));
 }

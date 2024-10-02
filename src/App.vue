@@ -16,7 +16,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed, watch } from 'vue'
+import { defineComponent, ref, computed, watch, onMounted } from 'vue'
 import FileScanner from './components/FileScanner.vue'
 import MusicList from './components/MusicList.vue'
 import MetadataEditor from './components/MetadataEditor.vue'
@@ -44,8 +44,15 @@ export default defineComponent({
       })
     })
 
-    const updateMusicFiles = (files: MusicFile[]) => {
+    const updateMusicFiles = async (files: MusicFile[]) => {
       musicFiles.value = files
+      // Remove this line as we're now saving files in the main process
+      // await window.electron.invoke('saveMusicFiles', files)
+    }
+
+    const loadSavedMusicFiles = async () => {
+      const savedFiles = await window.electron.invoke('loadMusicFiles')
+      musicFiles.value = savedFiles
     }
 
     const updateMetadata = (updatedFile: MusicFile) => {
@@ -78,6 +85,10 @@ export default defineComponent({
 
     watch(musicFiles, (newFiles) => {
       console.log('musicFiles changed, new length:', newFiles.length)
+    })
+
+    onMounted(async () => {
+      await loadSavedMusicFiles()
     })
 
     return {

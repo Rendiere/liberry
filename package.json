@@ -7,13 +7,18 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc && vite build && electron-builder",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "postinstall": "electron-builder install-app-deps",
+    "electron:build": "electron-builder"
   },
   "dependencies": {
     "music-metadata": "^7.13.0",
+    "sql.js": "^1.8.0",
     "vue": "^3.4.21"
   },
   "devDependencies": {
+    "@types/sql.js": "^1.4.4",
+    "@types/webpack-env": "^1.18.5",
     "@vitejs/plugin-vue": "^5.0.4",
     "@vue/runtime-core": "^3.5.10",
     "autoprefixer": "^10.4.20",
@@ -26,5 +31,22 @@
     "vite-plugin-electron": "^0.28.6",
     "vite-plugin-electron-renderer": "^0.14.5",
     "vue-tsc": "^2.0.26"
+  },
+  "build": {
+    "appId": "com.yourcompany.musiccollectorapp",
+    "files": [
+      "dist/**/*",
+      "electron/**/*"
+    ],
+    "directories": {
+      "buildResources": "assets",
+      "output": "release/${version}"
+    },
+    "extraResources": [
+      {
+        "from": "node_modules/sql.js/dist/sql-wasm.wasm",
+        "to": "sql-wasm.wasm"
+      }
+    ]
   }
 }
