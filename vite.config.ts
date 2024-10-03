@@ -1,43 +1,24 @@
-import { defineConfig } from 'vite'
-import electron from 'vite-plugin-electron'
-import renderer from 'vite-plugin-electron-renderer'
-import vue from '@vitejs/plugin-vue'
-import { resolve } from 'path'
+import { defineConfig } from 'vite';
+import vue from '@vitejs/plugin-vue';
+import path from 'path';
 
-// https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [
-    vue(),
-    electron([
-      {
-        // Main-Process entry file of the Electron App.
-        entry: 'electron/main.ts',
-        onstart(options) {
-          options.startup()
-        },
-        vite: {
-          build: {
-            rollupOptions: {
-              external: ['sql.js']
-            }
-          }
-        }
-      },
-      {
-        entry: 'electron/preload.ts',
-        onstart(options) {
-          options.reload()
-        },
-      },
-    ]),
-    renderer(),
-  ],
+  plugins: [vue()],
+  base: './', // Ensures that asset paths are relative
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src/renderer'),
+    },
+  },
+  root: path.resolve(__dirname, './src/renderer'), // Sets Vite's root to renderer directory
+  server: {
+    port: 5173, // Ensure this matches your desired port
+  },
   build: {
+    outDir: path.resolve(__dirname, 'dist/renderer'),
+    emptyOutDir: true,
     rollupOptions: {
-      input: {
-        main: resolve(__dirname, 'index.html'),
-        'sql-wasm': resolve(__dirname, 'node_modules/sql.js/dist/sql-wasm.wasm')
-      }
-    }
-  }
-})
+      input: path.resolve(__dirname, 'src/renderer/index.html'),
+    },
+  },
+});

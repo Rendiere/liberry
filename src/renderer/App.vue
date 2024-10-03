@@ -1,44 +1,47 @@
 <template>
-  <div class="container mx-auto p-4">
-    <h1 class="text-2xl font-bold mb-4">Music Collector App</h1>
-    <button @click="scanLocalFiles" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-      Scan Local Files
-    </button>
-    <div v-if="musicFiles.length > 0" class="mt-4">
-      <h2 class="text-xl font-semibold mb-2">Scanned Files:</h2>
-      <ul>
-        <li v-for="file in musicFiles" :key="file.path" class="mb-2">
-          {{ file.metadata.title || file.path }} - {{ file.metadata.artist }}
-        </li>
-      </ul>
-    </div>
-  </div>
+  <n-layout style="height: 100vh;">
+    <!-- Left Navigation Pane -->
+    <n-layout-sider width="250" bordered>
+      <LeftNavigation @navigate="handleNavigation" />
+    </n-layout-sider>
+
+    <!-- Main Content Area -->
+    <n-layout position="absolute" style="top: 0; right: 0; bottom: 80px; left: 250px;">
+      <n-layout-content content-style="padding: 24px;">
+        <component :is="views[currentView]" />
+      </n-layout-content>
+    </n-layout>
+
+    <!-- Now Playing Bar -->
+    <n-layout-footer bordered position="absolute" style="height: 80px; left: 250px; bottom: 0; right: 0;">
+      <NowPlaying />
+    </n-layout-footer>
+  </n-layout>
 </template>
 
-<script lang="ts">
-import { defineComponent, ref } from 'vue'
-import { scanDirectory } from '../services/localLibrary'
+<script setup lang="ts">
+import { ref } from 'vue'
+import { NLayout, NLayoutSider, NLayoutContent, NLayoutFooter } from 'naive-ui'
+import LeftNavigation from './components/LeftNavigation.vue'
+import NowPlaying from './components/NowPlaying.vue'
+import LibraryView from './components/LibraryView.vue'
 
-export default defineComponent({
-  name: 'App',
-  setup() {
-    const musicFiles = ref([])
+// Define available views
+const views = {
+  library: LibraryView,
+  // Add more views here as needed
+}
 
-    const scanLocalFiles = async () => {
-      try {
-        const files = await window.electron.invoke('dialog:openDirectory')
-        if (files) {
-          musicFiles.value = await scanDirectory(files[0])
-        }
-      } catch (error) {
-        console.error('Error scanning local files:', error)
-      }
-    }
+const currentView = ref<keyof typeof views>('library')
 
-    return {
-      musicFiles,
-      scanLocalFiles
-    }
+function handleNavigation(section: string) {
+  if (section === 'songs') {
+    currentView.value = 'library'
   }
-})
+  // Add more navigation logic here as needed
+}
 </script>
+
+<style scoped>
+/* No additional styles needed here */
+</style>

@@ -1,110 +1,154 @@
-# Music Collector App Product Requirements Document (PRD)
-
-## Project Overview
-
-The Music Collector App is a comprehensive platform designed for music enthusiasts, DJs, and professional musicians. It unifies various music platforms (local files, streaming services, and vinyl collections) into a single, intuitive interface. The app allows users to view, curate, and interact with their entire music collection across different platforms, play music from various sources, and maintain a high-quality, well-organized music library by leveraging metadata from multiple sources.
+# Project: Cross-Platform Music Library Application
 
 ## Tech Stack
 
-- Electron: Cross-platform desktop app framework
-- Vue.js: Frontend framework
-- Vite: Build tool and development server
-- Tailwind CSS: Utility-first CSS framework for styling
-- SQLite: Local database for offline functionality and persistent storage
-- music-metadata: Library for parsing music metadata
+### Frontend
+- **Framework**: Vue.js (with TypeScript)
+- **Component Library**: Naive UI
+- **Bundler**: Vite
 
-## Core Functionality
+### Backend
+- **Main Process**: Electron (with TypeScript) for desktop application
+- **Preload Script**: TypeScript for secure IPC between the main and renderer processes
+- **Database ORM**: Prisma (with SQLite) for local database management
 
-### Unified Music Library
-- As a user, I can view my entire music collection from various sources (local files, Spotify, Discogs) in a single interface
-- As a user, I can sort and filter my unified library by various criteria (e.g., platform, genre, artist, year)
-- As a user, I can search across my entire collection regardless of the music's source
-- As a user, I can see my music library in a custom table format with editable fields
+### Integration and External Services
+- **Authentication**: Clerk (future integration)
+- **Backend Storage/Database**: Supabase (future integration for cloud sync)
+- **Streaming Service Integration**: Spotify API (initial MVP)
 
-### Local Storage and Persistence
-- As a user, I only need to scan my local music files once, after which the parsed data is stored in a local SQLite database
-- As a user, I can quickly load my music library from the local database without rescanning files
+### Other Tools and Libraries
+- **Node.js**: JavaScript runtime for backend
+- **TypeScript**: Strongly typed language for better reliability and maintainability
+- **Electron IPC**: To communicate securely between the main process and the Vue renderer
 
-### Cross-Platform Playback
-- As a user, I can play local music files directly within the app
-- As a user, I can stream music from connected platforms (e.g., Spotify) without leaving the app
-- As a user, I can create and manage playlists that include tracks from multiple sources
-- As a user, I can see a persistent "Now Playing" bar at the bottom of the screen
-
-### Metadata Management
-- As a user, I can view detailed metadata for any track in my collection
-- As a user, I can edit metadata directly in the table view by right-clicking on a field
-- As a user, I can automatically fill in missing metadata for local files using information from Spotify or Discogs
-- As a user, I can manually edit and update metadata for any track in my collection
-- As a user, I can batch update metadata for multiple tracks simultaneously
-
-### Platform Integration
-- As a user, I can connect my Spotify account to import my playlists and liked songs
-- As a user, I can connect my Discogs account to import my vinyl collection
-- As a user, I can scan local directories to import my local music files
-- As a user, I can sync changes made in the app back to the respective platforms (where applicable)
-
-### Collection Curation
-- As a user, I can create custom tags to organize my music across platforms
-- As a user, I can create smart playlists based on various criteria from my unified library
-- As a user, I can export my curated playlists to connected platforms (e.g., Spotify)
-
-### User Interface
-- As a user, I can interact with a clean, intuitive interface similar to the provided example image
-- As a user, I can see a persistent "Now Playing" bar at the bottom of the screen
-- As a user, I can view my music library in a custom table format with easily editable fields
-
-## Supporting Docs
-
-- Electron API: https://www.electronjs.org/docs/latest/
-- Vue.js Guide: https://vuejs.org/guide/introduction.html
-- Vite Documentation: https://vitejs.dev/guide/
-- Tailwind CSS Documentation: https://tailwindcss.com/docs
-- Supabase Documentation: https://supabase.com/docs
-- SQLite Documentation: https://www.sqlite.org/docs.html
-- Clerk Documentation: https://clerk.com/docs
-- Spotify Web API: https://developer.spotify.com/documentation/web-api/
-- Discogs API: https://www.discogs.com/developers/
-- music-metadata library: https://github.com/borewit/music-metadata#readme
-
-## Current File Structure
-
-```
-music-collector-app/
-├── package.json
-├── vite.config.js
-├── electron.vite.config.js
-├── tailwind.config.js
-├── index.html
+## Folder Structure
+\`\`\`
+music-library-app/
 ├── src/
-│   ├── main.js              # Electron main process
-│   ├── preload.js           # Preload script for Electron
-│   ├── App.vue              # Root Vue component
-│   ├── assets/
-│   │   └── logo.png
-│   ├── components/
-│   │   ├── LibraryView.vue
-│   │   ├── NowPlaying.vue
-│   │   └── Sidebar.vue
-│   ├── views/
-│   │   ├── Home.vue
-│   │   ├── Library.vue
-│   │   └── Settings.vue
-│   ├── store/
-│   │   └── index.js         # Vuex store
-│   ├── router/
-│   │   └── index.js         # Vue Router
-│   ├── services/
-│   │   ├── spotify.js
-│   │   ├── discogs.js
-│   │   └── localLibrary.js
-│   └── utils/
-│       └── metadata.js
-├── public/
-│   └── favicon.ico
-└── electron/
-    ├── main.js
-    └── preload.js
-```
+│   ├── main/          # Main process
+│   │   ├── main.ts    # Electron entry file
+│   │   └── preload.ts # Preload script for secure IPC
+│   ├── renderer/      # Renderer process
+│   │   ├── App.vue    # Vue root component
+│   │   ├── index.html # HTML template for the renderer
+│   │   └── app.ts     # Renderer entry file (Vue setup)
+├── package.json
+├── tsconfig.json
+└── vite.config.ts     # Vite configuration file for Vue
+\`\`\`
 
-This structure provides a solid foundation for the Music Collector App, separating concerns and organizing code in a logical manner. As development progresses, new components, views, and services can be added to their respective directories.
+## User Interface Requirements
+
+### Overall Layout
+- The application will have a two-pane layout separated by a draggable split component.
+- A "Now Playing" bar will span the entire bottom of the application.
+
+### Left Navigation Pane
+- Located on the left side of the application.
+- Contains a search component at the top.
+- Displays a "Library" section with subsections:
+  - Songs
+  - Albums
+  - Artists
+- [Future expansion] Will include other sections like "Apple Music", "Radio", etc.
+
+### Main Content Area
+- Located on the right side of the split pane.
+- Displays content based on the selected item in the left navigation.
+- For the "Songs" view, it shows a data table with song information.
+
+### Now Playing Bar
+- Located at the bottom of the application, spanning the entire width.
+- Contains:
+  - Play/Pause button
+  - Next and Previous buttons
+  - Song details (Title, Album) in the middle
+  - Volume slider on the right
+
+### Library View (Songs)
+- Displayed in the main content area when "Songs" is selected.
+- Uses a Data Table component to show song information.
+- Columns include:
+  - Title
+  - Artist
+  - Album
+  - Time (duration)
+  - Year
+
+## Functional Requirements
+
+### Search Functionality
+- A search bar in the left navigation pane.
+- [Future implementation] Will allow searching across the music library.
+
+### Music Playback Controls
+- Play/Pause functionality
+- Next/Previous track navigation
+- Volume control
+
+### Library Management
+- Display of user's music library in a tabular format
+- [Future implementation] Sorting and filtering options for the library view
+
+## Development Plan to Build MVP
+
+### 1. Project Initialization
+- Create a clean project directory and initialize a new Node.js project.
+- Set up TypeScript in the project (\`tsconfig.json\`) and configure it for a modern JavaScript setup.
+
+### 2. Frontend Setup
+- Install and configure Vue.js with TypeScript.
+- Add Naive UI for Vue components.
+- Use vfonts for fonts
+- Use xicons for icons
+- Create a minimal folder structure with necessary Vue components (\`App.vue\`) and HTML files.
+- Install and configure Vite to compile Vue files and bundle the application.
+
+### 3. Electron Integration
+- Install Electron and configure it as a development dependency.
+- Create the \`main.ts\` file to define the Electron main process (e.g., creating the main window).
+- Create \`preload.ts\` for secure IPC communication between the main process and renderer.
+- Set up the main Electron process to load the Vue app from \`index.html\`.
+
+### 4. Database Integration
+- Install Prisma and set up SQLite as the local database.
+- Define a basic Prisma schema to store music library information.
+- Generate the Prisma client and integrate it with the Electron main process.
+
+### 5. Vue and Electron Communication
+- Write a preload script (\`preload.ts\`) to enable communication between the Vue renderer and Electron main process using IPC.
+- Update the Vue app to use IPC for interactions that require backend logic (e.g., accessing local music files, syncing data).
+
+### 6. Spotify API Integration
+- Create a service in Vue to interact with the Spotify API, using it to fetch music metadata.
+- Implement a basic UI in Vue (\`App.vue\`) to display Spotify music alongside locally stored files.
+
+### 7. User Interface Development
+- Use Naive UI to create the main layout for the music library, with features such as playlists and adding music.
+- Develop features for browsing, searching, and playing music from both local files and Spotify.
+
+### 8. Testing and Debugging
+- Test integration between Vue and Electron (including IPC).
+- Test database read/write operations locally using Prisma.
+- Ensure the UI is responsive and functional across different operating systems (Windows, macOS, Linux).
+
+### 9. Final Steps for MVP
+- Package the application for different platforms using Electron.
+- Perform basic user testing to ensure stability.
+- Prepare documentation for installation and usage.
+
+## Future Enhancements
+- **Add Authentication**: Integrate Clerk for user authentication.
+- **Cloud Sync**: Use Supabase to store user data in the cloud and enable syncing between devices.
+- **Freemium Model**: Develop features that differentiate between free and premium versions of the application.
+
+## Development Phases
+
+### Phase 1: Basic UI Implementation
+- Set up the two-pane layout with draggable split
+- Implement the left navigation pane with search bar and Library section
+- Create the Now Playing bar with basic controls
+- Implement the Library view with a data table for Songs
+
+### Phase 2

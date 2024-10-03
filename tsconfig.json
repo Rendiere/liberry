@@ -1,42 +1,18 @@
 {
   "compilerOptions": {
-    "target": "esnext",
-    "module": "esnext",
-    "strict": true,
-    "jsx": "preserve",
-    "importHelpers": true,
+    "target": "ESNext",
+    "module": "CommonJS",
     "moduleResolution": "node",
-    "skipLibCheck": true,
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "sourceMap": true,
+    "strict": true,
+    "outDir": "./dist",
     "baseUrl": ".",
-    "types": [
-      "webpack-env",
-      "node",
-      "@vue/runtime-core"
-    ],
     "paths": {
-      "@/*": [
-        "src/*"
-      ]
+      "*": ["node_modules/*"]
     },
-    "lib": [
-      "esnext",
-      "dom",
-      "dom.iterable",
-      "scripthost"
-    ]
+    "skipLibCheck": true,
+    "types": ["@types/node"]
   },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.d.ts",
-    "src/**/*.tsx",
-    "src/**/*.vue",
-    "electron/**/*.ts",
-    "src/sqljs-worker.js"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "include": ["src/**/*.ts", "src/**/*.vue"],
+  "exclude": ["node_modules", "dist"]
 }
