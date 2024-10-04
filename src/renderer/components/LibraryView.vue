@@ -3,7 +3,6 @@
     <n-data-table
       :columns="columns"
       :data="songs"
-      :pagination="pagination"
       :bordered="false"
       :striped="true"
       :size="'medium'"
@@ -13,8 +12,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { NDataTable } from 'naive-ui'
+import { ref, onMounted, h } from 'vue'
+import { useNowPlayingStore } from '../stores/nowPlaying'
+import { NDataTable, NButton, NIcon } from 'naive-ui'
+import { PlayOne } from '@icon-park/vue-next'
 
 interface Song {
   id: number
@@ -32,8 +33,22 @@ interface Song {
 
 const songs = ref<Song[]>([])
 const loading = ref(true)
+const nowPlayingStore = useNowPlayingStore()
 
 const columns = [
+  {
+    title: 'Play',
+    key: 'play',
+    width: 60,
+    render: (row: Song) => {
+      return h(NButton, {
+        size: 'small',
+        onClick: () => playSong(row)
+      },
+      { default: () => h(NIcon, null, { default: () => h(PlayOne) }) }
+      )
+    }
+  },
   {
     title: 'Title',
     key: 'title',
@@ -59,8 +74,10 @@ const columns = [
   },
 ]
 
-const pagination = {
-  pageSize: 10,
+function playSong(song: Song) {
+  console.log('playSong called with:', song)
+  nowPlayingStore.setPlaylist(songs.value)
+  nowPlayingStore.setCurrentSong(song);
 }
 
 function formatDuration(seconds: number): string {

@@ -14,5 +14,6 @@ contextBridge.exposeInMainWorld('api', {
     const response = await ipcRenderer.invoke('import-music');
     return response;
   },
+  loadAudioFile: (filePath: string) => ipcRenderer.invoke('load-audio-file', filePath),
   // Add more methods as needed
 });

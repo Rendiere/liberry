@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog, protocol } from 'electron';
 import * as path from 'path';
 import * as fs from 'fs/promises';
 import prisma from './utils/prisma';
@@ -63,7 +63,11 @@ ipcMain.handle('get-songs', async () => {
         title: true,
         artist: true,
         album: true,
-        // Add other fields you want to retrieve
+        year: true,
+        genre: true,
+        duration: true,
+        filePath: true,
+        // Add any other fields you want to display
       }
     });
     return { success: true, data: songs };
@@ -106,6 +110,16 @@ ipcMain.handle('import-music', async () => {
   } catch (error) {
     console.error('Error importing music:', error);
     return { success: false, error: 'Failed to import music.' };
+  }
+});
+
+ipcMain.handle('load-audio-file', async (event, filePath) => {
+  try {
+    const fileBuffer = await fs.readFile(filePath);
+    return fileBuffer.toString('base64');
+  } catch (error) {
+    console.error('Error loading audio file:', error);
+    return null;
   }
 });
 
