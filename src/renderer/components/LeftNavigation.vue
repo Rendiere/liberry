@@ -1,5 +1,6 @@
 <template>
-    <div class="left-navigation">
+    <n-layout-sider-content>
+      <n-button @click="importMusic" style="margin-bottom: 16px;">Import Music</n-button>
       <n-input-group>
         <n-input placeholder="Search" />
         <n-button type="primary">
@@ -9,12 +10,12 @@
         </n-button>
       </n-input-group>
       <n-menu :options="menuOptions" />
-    </div>
+    </n-layout-sider-content>
   </template>
   
   <script setup lang="ts">
   import { h } from 'vue'
-  import { NMenu, NInput, NInputGroup, NButton, NIcon } from 'naive-ui'
+  import { NMenu, NInput, NInputGroup, NButton, NIcon, NLayoutContent } from 'naive-ui'
   import { SearchOutline as SearchIcon, MusicalNoteOutline as SongIcon, PersonOutline as ArtistIcon } from '@vicons/ionicons5'
   
   const menuOptions = [
@@ -67,6 +68,16 @@
       ]
     }
   ]
+  
+  const importMusic = async () => {
+    const result = await window.api.importMusic()
+    if (result.success) {
+      // You can add a notification or update the UI here
+      console.log('Music imported successfully')
+    } else {
+      console.error('Failed to import music:', result.error)
+    }
+  }
   </script>
   
   <style scoped>

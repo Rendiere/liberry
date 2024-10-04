@@ -1,6 +1,8 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import * as path from 'path';
-import prisma from './utils/prisma'; // Import Prisma Client
+import * as fs from 'fs/promises';
+import prisma from './utils/prisma';
+import * as mm from 'music-metadata';
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -52,22 +54,17 @@ app.on('activate', () => {
  * IPC Handlers for Database Operations
  */
 
-// Fetch all songs with related artist and album data
+// Fetch all songs
 ipcMain.handle('get-songs', async () => {
   try {
     const songs = await prisma.song.findMany({
-      include: {
-        artist: {
-          select: {
-            name: true,
-          },
-        },
-        album: {
-          select: {
-            title: true,
-          },
-        },
-      },
+      select: {
+        id: true,
+        title: true,
+        artist: true,
+        album: true,
+        // Add other fields you want to retrieve
+      }
     });
     return { success: true, data: songs };
   } catch (error) {
@@ -90,3 +87,95 @@ ipcMain.handle('add-song', async (_event, songData) => {
 });
 
 // Add more IPC handlers as needed for other operations
+
+ipcMain.handle('import-music', async () => {
+  try {
+    const result = await dialog.showOpenDialog(mainWindow!, {
+      properties: ['openDirectory']
+    });
+
+    if (result.canceled) {
+      return { success: false, error: 'Operation canceled' };
+    }
+
+    const dir = result.filePaths[0];
+    const files = await scanDirectory(dir);
+    const importedSongs = await importSongs(files);
+
+    return { success: true, data: { importedCount: importedSongs.length } };
+  } catch (error) {
+    console.error('Error importing music:', error);
+    return { success: false, error: 'Failed to import music.' };
+  }
+});
+
+async function scanDirectory(dir: string): Promise<string[]> {
+  const files = await fs.readdir(dir);
+  const musicFiles: string[] = [];
+
+  for (const file of files) {
+    const filePath = path.join(dir, file);
+    const stats = await fs.stat(filePath);
+
+    if (stats.isDirectory()) {
+      musicFiles.push(...await scanDirectory(filePath));
+    } else if (file.endsWith('.mp3') || file.endsWith('.flac')) {
+      musicFiles.push(filePath);
+    }
+  }
+
+  return musicFiles;
+}
+
+async function importSongs(files: string[]): Promise<any[]> {
+  const importedSongs: any[] = [];
+
+  for (const file of files) {
+    try {
+      const metadata = await mm.parseFile(file);
+      const { common, format } = metadata;
+
+      const artist = common.artist || 'Unknown Artist';
+      const album = common.album || 'Unknown Album';
+      const label = common.label? common.label[0] : 'Unknown Label';
+    
+      const song = await prisma.song.upsert({
+        where: {
+          title_artist_album: {
+            title: common.title || path.basename(file, path.extname(file)),
+            artist: artist,
+            album: album,
+          }
+        },
+        update: {},
+        create: {
+          title: common.title || path.basename(file, path.extname(file)),
+          artist: artist,
+          album: album,
+          trackNumber: common.track.no || null,
+          trackTotal: common.track.of || null,
+          diskNumber: common.disk.no || null,
+          diskTotal: common.disk.of || null,
+          year: common.year ? common.year : null,
+          genre: common.genre ? common.genre[0] : null,
+          duration: format.duration || 0,
+          bitrate: format.bitrate || 0,
+          sampleRate: format.sampleRate || 0,
+          label: label,
+          filePath: file,
+          numberOfChannels: format.numberOfChannels || 0,
+          lossless: format.lossless || false,
+          comment: common.comment ? common.comment[0] : null,
+          bpm: common.bpm ? common.bpm : null,
+          key: common.key || null,
+        },
+      });
+
+      importedSongs.push(song);
+    } catch (error) {
+      console.error(`Error importing file ${file}:`, error);
+    }
+  }
+
+  return importedSongs;
+}

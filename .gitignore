@@ -22,3 +22,5 @@ dist-electron
 *.db
 
 *.env
+
+prisma/migrations

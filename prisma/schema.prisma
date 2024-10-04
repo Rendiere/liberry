@@ -13,30 +13,32 @@ datasource db {
   url      = "file:./dev.db"
 }
 
-model Artist {
-  id      Int     @id @default(autoincrement())
-  name    String  @unique
-  albums  Album[]
-  songs   Song[]
-}
-
-model Album {
-  id        Int     @id @default(autoincrement())
-  title     String
-  artist    Artist  @relation(fields: [artistId], references: [id])
-  artistId  Int
-  songs     Song[]
-  releaseAt DateTime?
-}
-
 model Song {
-  id        Int     @id @default(autoincrement())
-  title     String
-  artist    Artist  @relation(fields: [artistId], references: [id])
-  artistId  Int
-  album     Album?  @relation(fields: [albumId], references: [id])
-  albumId   Int?
-  duration  Int     // Duration in seconds
-  year      Int
-  filePath  String  @unique
+  id              Int      @id @default(autoincrement())
+  title           String
+  trackNumber     Int?
+  trackTotal      Int?
+  diskNumber      Int?
+  diskTotal       Int?
+  artist          String?
+  album           String?
+  year            Int?
+  genre           String?
+  key             String?
+  bpm             Float?
+  duration        Float
+  bitrate         Int
+  sampleRate      Int
+  numberOfChannels Int
+  lossless        Boolean
+  label           String?
+  comment         String?
+  rating          Float?
+  ratingSource    String?
+  importedAt      DateTime @default(now())
+  filePath        String
+  updatedAt       DateTime @updatedAt
+
+  @@unique([title, artist, album])
 }
+
